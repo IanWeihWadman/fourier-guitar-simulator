@@ -98,6 +98,8 @@ private:
 	double newTensionMod;
 	double currentTensionMod;
 	double tension;
+	double tensionDecrease;
+	double acoustic;
 	int currentFret;
 	int oldFret;
 	double timeStep;
