@@ -1,6 +1,4 @@
-SETLOCAL
-
-REM %1 is tabs file name which is also song name
+REM %1 is tabs file name
 
 SET config=Release
 SET simulate=guitarSimulation\%config%\guitarSimulation.exe

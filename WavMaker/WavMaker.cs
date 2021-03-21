@@ -39,7 +39,7 @@ namespace WavMaker
                 writer.WriteSamples(buffer, 0, buffer.Length);
                 writer.Close();
             }
-            System.IO.File.Copy(filenames[0] + ".wav", "simOut\\" + songName + ".wav");
+            System.IO.File.Copy(filenames[0] + ".wav", "simOut\\" + songName + ".wav", true);
         }
     }
 }

@@ -3,9 +3,15 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Specific to guitar project
+parseOut/
+simOut/
+
+*.swp
+
 # User-specific files
 *.rsuser
-*.suo
+#*.suo - pulling this so we can share project settings
 *.user
 *.userosscache
 *.sln.docstates
