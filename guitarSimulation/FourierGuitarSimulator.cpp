@@ -23,12 +23,12 @@ int main(int argc, char** argv)
 	std::filesystem::create_directory(outputDir);
 	if (std::filesystem::exists(filePath))
 	{
-		FourierString EString(200, 0, outputDir + filePath);
-		FourierString AString(180, 1, outputDir + filePath);
-		FourierString DString(160, 2, outputDir + filePath);
-		FourierString GString(140, 3, outputDir + filePath);
-		FourierString BString(120, 4, outputDir + filePath);
-		FourierString highEString(100, 5, outputDir + filePath);
+		FourierString EString(200, 0, filePath);
+		FourierString AString(180, 1, filePath);
+		FourierString DString(160, 2, filePath);
+		FourierString GString(140, 3, filePath);
+		FourierString BString(120, 4, filePath);
+		FourierString highEString(100, 5, filePath);
 		int totalLength = AString.totalMusicLength;
 		std::thread EThread(&FourierString::simulate, &EString, outputDir + "EFile.txt");
 		std::thread AThread(&FourierString::simulate, &AString, outputDir + "AFile.txt");
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 		std::ifstream GStream(outputDir + "GFile.txt");
 		std::ifstream BStream(outputDir + "BFile.txt");
 		std::ifstream eStream(outputDir + "HighEFile.txt");
-		std::ofstream output("simOut\\" + filePath + ".simout.txt");
+		std::ofstream output(outputDir + "output.txt");
 		for (int i = 0; i < totalLength + 22050; i++) {
 			value = 0;
 			EStream >> stringAddition;

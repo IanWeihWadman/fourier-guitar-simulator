@@ -12,7 +12,9 @@ namespace WavMaker
     {
         static void Main(string[] args)
         {
-            string[] filenames = new string[] { "output", "EFile", "AFile", "DFile", "GFile", "BFile", "HighEFile" };
+            string songName = (args.Length == 1) ? args[0] : Console.ReadLine();
+            string simPath = "simOut\\" + songName + "\\";
+            string[] filenames = new string[] { simPath + "output", simPath + "EFile", simPath+"AFile", simPath + "DFile", simPath + "GFile", simPath + "BFile", simPath + "HighEFile" };
             foreach (string e in filenames)
             {
                 StreamReader file = new StreamReader(e + ".txt");
@@ -37,6 +39,7 @@ namespace WavMaker
                 writer.WriteSamples(buffer, 0, buffer.Length);
                 writer.Close();
             }
+            System.IO.File.Copy(filenames[0] + ".wav", "simOut\\" + songName + ".wav");
         }
     }
 }
