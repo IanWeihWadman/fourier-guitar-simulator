@@ -4,36 +4,38 @@
 #include "FourierString.h"
 int main(int argc, char** argv)
 {
+	std::string filePath;
 	std::string fileName;
 	std::string outputDir;
-	if (argc == 3)
+	if (argc == 2)
 	{
 		fileName = argv[1];
-		fileName = "guitarSimulation\\parsedSongFiles\\" + fileName;
-		//outputDir = argv[2]+ "\" + argv[1];
 	}
 	else
 	{
 		std::cin >> fileName;
-		fileName = "guitarSimulation\\parsedSongFiles\\" + fileName;
-		outputDir = "";
+
 	}
-	//fileName = fileName + ".txt";
-	if (std::filesystem::exists(fileName))
+	filePath = "parseOut\\" + fileName + ".out";
+	outputDir = "simOut\\" + fileName + "\\";
+	std::filesystem::path outputPath(outputDir);
+	std::cout << "CWD: " + std::filesystem::current_path().string(); +"\n";
+	std::filesystem::create_directory(outputDir);
+	if (std::filesystem::exists(filePath))
 	{
-		FourierString EString(200, 0, outputDir+fileName);
-		FourierString AString(180, 1, outputDir + fileName);
-		FourierString DString(160, 2, outputDir + fileName);
-		FourierString GString(140, 3, outputDir + fileName);
-		FourierString BString(120, 4, outputDir + fileName);
-		FourierString highEString(100, 5, outputDir + fileName);
+		FourierString EString(200, 0, outputDir+filePath);
+		FourierString AString(180, 1, outputDir + filePath);
+		FourierString DString(160, 2, outputDir + filePath);
+		FourierString GString(140, 3, outputDir + filePath);
+		FourierString BString(120, 4, outputDir + filePath);
+		FourierString highEString(100, 5, outputDir + filePath);
 		int totalLength = AString.totalMusicLength;
-		std::thread EThread(&FourierString::simulate, &EString, "EFile.txt");
-		std::thread AThread(&FourierString::simulate, &AString, "AFile.txt");
-		std::thread DThread(&FourierString::simulate, &DString, "DFile.txt");
-		std::thread GThread(&FourierString::simulate, &GString, "GFile.txt");
-		std::thread BThread(&FourierString::simulate, &BString, "BFile.txt");
-		std::thread highEThread(&FourierString::simulate, &highEString, "HighEFile.txt");
+		std::thread EThread(&FourierString::simulate, &EString, outputDir+"EFile.txt");
+		std::thread AThread(&FourierString::simulate, &AString, outputDir + "AFile.txt");
+		std::thread DThread(&FourierString::simulate, &DString, outputDir + "DFile.txt");
+		std::thread GThread(&FourierString::simulate, &GString, outputDir + "GFile.txt");
+		std::thread BThread(&FourierString::simulate, &BString, outputDir + "BFile.txt");
+		std::thread highEThread(&FourierString::simulate, &highEString, outputDir + "HighEFile.txt");
 		EThread.join();
 		AThread.join();
 		DThread.join();
@@ -44,13 +46,13 @@ int main(int argc, char** argv)
 		double stringAddition = 0;
 		double processedValue = 0;
 		std::string comma;
-		std::ifstream EStream("EFile.txt");
-		std::ifstream AStream("AFile.txt");
-		std::ifstream DStream("DFile.txt");
-		std::ifstream GStream("GFile.txt");
-		std::ifstream BStream("BFile.txt");
-		std::ifstream eStream("HighEFile.txt");
-		std::ofstream output("output.txt");
+		std::ifstream EStream(outputDir + "EFile.txt");
+		std::ifstream AStream(outputDir + "AFile.txt");
+		std::ifstream DStream(outputDir + "DFile.txt");
+		std::ifstream GStream(outputDir + "GFile.txt");
+		std::ifstream BStream(outputDir + "BFile.txt");
+		std::ifstream eStream(outputDir + "HighEFile.txt");
+		std::ofstream output(outputDir + filePath+".out.txt");
 		for (int i = 0; i < totalLength + 22050; i++) {
 			value = 0;
 			EStream >> stringAddition;
@@ -94,7 +96,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		std::cout << fileName + " not found\n";
+		std::cout << filePath + " not found\n";
 	}
 }
 

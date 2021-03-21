@@ -19,8 +19,8 @@ namespace TabParser
                 currentLocation *= (1 - 1 / 17.817);
             }
             // StreamReader reader = new StreamReader("C:\\Users\\annel\\source\\repos\\TabParser\\" + Filename);
-            StreamReader reader = new StreamReader(Filename);
-            StreamWriter writer = new StreamWriter(Filename+".out");
+            StreamReader reader = new StreamReader("rawSongFiles\\"+Filename);
+            StreamWriter writer = new StreamWriter("parseOut\\"+Filename+".out");
             string line = "";
             int lineIndex = -2;
             List<List<string>> information = new List<List<string>>();
