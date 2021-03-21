@@ -481,6 +481,8 @@ double FourierString::updateState()
 	//This scaling factor accounts for the change in the effective "length" of the string caused by fretting
 	double fretScale = pow(2, currentFret / (double)12);
 	//Main calculation follows standard RK4 method
+	for (int k = 0; k < stepsPerSample; k++) 
+	{
 		for (int i = 0; i < overtones; i++) {
 			Statek1[i] = Derivative[i];
 			Derivativek1[i] = -State[i] * tensionModifiers[i] * effectiveTension / (1 + overallNonlinearity * (highFrequencyNonlinearity * i + 1) * abs(State[i])) - (naturalDamping[i] + addedDamping[i]) * Derivative[i];
