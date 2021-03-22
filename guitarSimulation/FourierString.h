@@ -59,6 +59,14 @@ private:
 	std::vector<double> pickDisruption;
 	std::vector<double> resonances;
 	std::vector<double> resonanceDerivatives;
+	std::vector<double> resonancesk1;
+	std::vector<double> resonanceDerivativesk1;
+	std::vector<double> resonancesk2;
+	std::vector<double> resonanceDerivativesk2;
+	std::vector<double> resonancesk3;
+	std::vector<double> resonanceDerivativesk3;
+	std::vector<double> resonancesk4;
+	std::vector<double> resonanceDerivativesk4;
 	std::vector<double> resonanceFrequencies;
 	std::vector<double> resonanceDamping;
 	std::vector<double> tensionModifiers;

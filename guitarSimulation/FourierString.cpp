@@ -68,20 +68,18 @@ FourierString::FourierString(int tones, int number, std::string fileName)
 	resonanceFrequencies.assign(resonanceNum, 0);
 	tensionModifiers.assign(overtones, 0);
 	naturalDamping.assign(overtones, 0);
-	for (int i = 0; i < resonanceNum; i++) {
-		std::vector<double> newVec;
-		newVec.assign(overtones, 0);
-		for (int j = 0; j < overtones; j++) {
-			newVec[j] = cos(3.1415 * 0.1 * j * i);
-		}
-		resonateCoupling.push_back(newVec);
-	}
+	newTensionMod = 0;
+	newPickForce = 0;
+	oldPickForce = 0;
+	oldTensionMod = 0;
+	pulloffForce = 0;
+	currentPickForce = 0;
 	for (int i = 0; i < overtones; i++) {
 		tensionModifiers[i] = (i + 1) * (i + 1) * ( 1 - tensionDecrease * i * i / (double) (overtones * overtones));
 	}
 	for (int i = 0; i < resonanceNum; i++) {
-		resonanceDamping[i] = 10;
-		resonanceFrequencies[i] = 30000 + 1600 * i + 700 * sqrt(i);
+		resonanceDamping[i] = 3 - i * 2.5 / (double) resonanceNum;
+		resonanceFrequencies[i] = 30000 + 6000 * i + 700 * sqrt(i);
 	}
 	//Every pair of frets has a matrix associated with the transition between those two frets representing a linear transformation on the Fourier coefficients of the state
 	for (int p = 0; p < fretCount; p++) {
@@ -116,7 +114,6 @@ FourierString::FourierString(int tones, int number, std::string fileName)
 			nextMatrixSet.push_back(nextMatrix);
 		}
 		fretChangeMatrix.push_back(nextMatrixSet);
-		
 	}
 }
 
@@ -515,17 +512,6 @@ double FourierString::updateState()
 			State[i] += 0.1666667 * timeStep * (Statek1[i] + 2 * Statek2[i] - 4 * Statek3[i] + Statek4[i]);
 			Derivative[i] += 0.1666667 * timeStep * (Derivativek1[i] + 2 * Derivativek2[i] - 4 * Derivativek3[i] + Derivativek4[i]);
 		}
-		//Resonance are oscillators influenced by the string, which in turn drive the strings
-		for (int i = 0; i < resonanceNum; i++) {
-			for (int k = 0; k < overtones; k++) {
-				resonances[i] += resonateCoupling[i][k] * timeStep * Derivative[k] / (1 + k * k);
-			}
-			resonanceDerivatives[i] += -timeStep * (resonanceFrequencies[i] * resonances[i] + resonanceDamping[i] * resonanceDerivatives[i]);
-			resonances[i] += timeStep * resonanceDerivatives[i];
-			for (int k = 0; k < overtones; k++) {
-				Derivative[k] += resonateCoupling[i][k] * timeStep * 0.4 * resonanceDerivatives[i] / (1 + k * k);
-			}
-		}
 		//Picking is described by a linear constraint, or more generally a set of linear constraints
 		//If the inner product of the state with the constraint vector is below the target value, currentPickForce, a large force is immediately applied
 		//in the direction of the constraint vector until the inner product is above the target value
@@ -708,5 +694,5 @@ double FourierString::spline(const std::vector<double>& points, double input)
 double FourierString::pickupResponse(double fretScale, int overtone) {
 	//This function captures the effect of the pickup if the acoustic parameter is non-zero
 	//The location of the pickup relative to the peaks and nodes of each frequency varies with fret, so fretScale must be passed to this function
-	return 4 * (1 - acoustic) * (pickupWidth / (1 + overtone) + abs(sin(fretScale * 3.1415 * pickupLocation * (overtone + 1)))) * ( 1 + stringBrightness * overtone / (double) 100 ) + acoustic;
+	return 4 * (1 - acoustic) * (pickupWidth / (1 + overtone) + abs(sin(fretScale * 3.1415 * pickupLocation * (overtone + 1)))) * ( 1 + stringBrightness * overtone / (double) 100 ) + 3 * acoustic;
 }
