@@ -18,7 +18,6 @@ namespace TabParser
                 fretLocations[i] = currentLocation;
                 currentLocation *= (1 - 1 / 17.817);
             }
-            // StreamReader reader = new StreamReader("C:\\Users\\annel\\source\\repos\\TabParser\\" + Filename);
             StreamReader reader = new StreamReader("rawSongFiles\\"+Filename);
             StreamWriter writer = new StreamWriter("parseOut\\"+Filename+".out");
             string line = "";

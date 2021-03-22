@@ -23,13 +23,15 @@ int main(int argc, char** argv)
 	std::filesystem::create_directory(outputDir);
 	if (std::filesystem::exists(filePath))
 	{
+		FourierString DString(160, 2, filePath);
+		FourierString highEString(100, 5, filePath);
 		FourierString EString(200, 0, filePath);
 		FourierString AString(180, 1, filePath);
-		FourierString DString(160, 2, filePath);
 		FourierString GString(140, 3, filePath);
 		FourierString BString(120, 4, filePath);
-		FourierString highEString(100, 5, filePath);
+
 		int totalLength = AString.totalMusicLength;
+	
 		std::thread EThread(&FourierString::simulate, &EString, outputDir + "EFile.txt");
 		std::thread AThread(&FourierString::simulate, &AString, outputDir + "AFile.txt");
 		std::thread DThread(&FourierString::simulate, &DString, outputDir + "DFile.txt");
@@ -81,15 +83,6 @@ int main(int argc, char** argv)
 				processedValue = -1.8;
 			}
 			processedValue = processedValue / (1 + 0.3 * processedValue * processedValue);
-			/*processedValue = 0.25 * value;
-			if (processedValue > 1) {
-				std::cout << "clipped \r\n";
-				processedValue = 1;
-			}
-			if (processedValue < -1) {
-				std::cout << "clipped \r\n";
-				processedValue = -1;
-			}*/
 			output << processedValue << ", ";
 		}
 		output.close();
