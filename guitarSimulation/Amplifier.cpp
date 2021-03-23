@@ -5,9 +5,14 @@ Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, st
 	double stringAddition;
 	double value = 0;
 	double processedValue = 0;
-	double compress = 0.7;
-	double threshold = 0.2;
-	double gain = 0.1;
+	double compress = 0.6;
+	double threshold = 0.15;
+	double gain = 0.2;
+	double hardClip = 0.16;
+	double feedbackPower = 50;
+	double feedbackWavelength = 55;
+	//0.6, 0.15, 0.2, 0.16, 50, 55 are good parameters for intense feedback
+	//0.5, 0.15, 0.2, 1, 0, 0 for cleanest sound
 	std::ifstream EStream(File1);
 	std::ifstream AStream(File2);
 	std::ifstream DStream(File3);
@@ -41,14 +46,14 @@ Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, st
 		eStream >> stringAddition;
 		value += stringAddition;
 		eStream >> comma;			
-		value = 3 * value;
+		value = 12 * value;
 		window[399] = value;
 		for (int i = 0; i < 399; i++) {
-			window[399] -= outputWindow[i] / ( 1 + 0.1 * ( i - 200 ) * ( i - 200 ) );
+			window[399] -= (1 + sin(0.6 * i)) * feedbackPower * (outputWindow[i] / (1 + 0.2 * i + abs(outputWindow[i]))) / ( 1 + 0.05 * ( i - 399 + feedbackWavelength ) * ( i - 399 + feedbackWavelength ) );
 		}
 		double amplitude = 0;
 		for (int j = 0; j < 399; j++) {
-			amplitude += (window[j] - window[j+1]) * (window[j] - window[j + 1]) / (50 + j);
+			amplitude += window[j] * window[j] / (50 + j);
 			window[j] = window[j + 1];
 			outputWindow[j] = outputWindow[j + 1];
 		}
@@ -58,6 +63,12 @@ Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, st
 		double compressed = (threshold * compress / amplitude + 1 - compress) * window[399];
 		compressed *= gain;
 		processedValue += compressed / (1 + abs(compressed));
+		if (processedValue > hardClip) {
+			processedValue = hardClip;
+		}
+		if (processedValue < -hardClip) {
+			processedValue = -hardClip;
+		}
 		outputWindow[399] = processedValue;
 		output << processedValue << " , ";
 	}

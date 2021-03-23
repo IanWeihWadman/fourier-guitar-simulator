@@ -2,6 +2,7 @@
 #include <thread>
 #include <filesystem>
 #include "FourierString.h"
+#include "Amplifier.h"
 int main(int argc, char** argv)
 {
 	std::string filePath;
@@ -14,7 +15,6 @@ int main(int argc, char** argv)
 	else
 	{
 		std::cin >> fileName;
-
 	}
 	filePath = "parseOut\\" + fileName + ".out";
 	outputDir = "simOut\\" + fileName + "\\";
@@ -23,14 +23,16 @@ int main(int argc, char** argv)
 	std::filesystem::create_directory(outputDir);
 	if (std::filesystem::exists(filePath))
 	{
+		FourierString AString(180, 1, filePath);
+		int totalLength = AString.totalMusicLength;
+		FourierString BString(120, 4, filePath);
 		FourierString DString(160, 2, filePath);
 		FourierString highEString(100, 5, filePath);
 		FourierString EString(200, 0, filePath);
-		FourierString AString(180, 1, filePath);
-		FourierString GString(140, 3, filePath);
-		FourierString BString(120, 4, filePath);
 
-		int totalLength = AString.totalMusicLength;
+		FourierString GString(140, 3, filePath);
+
+
 	
 		std::thread EThread(&FourierString::simulate, &EString, outputDir + "EFile.txt");
 		std::thread AThread(&FourierString::simulate, &AString, outputDir + "AFile.txt");
@@ -48,14 +50,7 @@ int main(int argc, char** argv)
 		double stringAddition = 0;
 		double processedValue = 0;
 		std::string comma;
-		std::ifstream EStream(outputDir + "EFile.txt");
-		std::ifstream AStream(outputDir + "AFile.txt");
-		std::ifstream DStream(outputDir + "DFile.txt");
-		std::ifstream GStream(outputDir + "GFile.txt");
-		std::ifstream BStream(outputDir + "BFile.txt");
-		std::ifstream eStream(outputDir + "HighEFile.txt");
-		std::ofstream output(outputDir + "output.txt");
-		for (int i = 0; i < totalLength + 22050; i++) {
+		/*for (int i = 0; i < totalLength + 22050; i++) {
 			value = 0;
 			EStream >> stringAddition;
 			value += stringAddition;
@@ -85,7 +80,8 @@ int main(int argc, char** argv)
 			processedValue = processedValue / (1 + 0.3 * processedValue * processedValue);
 			output << processedValue << ", ";
 		}
-		output.close();
+		output.close();*/
+		Amplifier amp(outputDir + "EFile.txt", outputDir + "AFile.txt", outputDir + "DFile.txt", outputDir + "GFile.txt", outputDir + "BFile.txt", outputDir + "HighEFile.txt", outputDir + "output.txt", totalLength);
 	}
 	else
 	{

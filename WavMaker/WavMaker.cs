@@ -14,7 +14,8 @@ namespace WavMaker
         {
             string songName = (args.Length == 1) ? args[0] : Console.ReadLine();
             string simPath = "simOut\\" + songName + "\\";
-            string[] filenames = new string[] { simPath + "output", simPath + "EFile", simPath + "AFile", simPath + "DFile", simPath + "GFile", simPath + "BFile", simPath + "HighEFile" };
+            //string[] filenames = new string[] { simPath + "output", simPath + "EFile", simPath + "AFile", simPath + "DFile", simPath + "GFile", simPath + "BFile", simPath + "HighEFile" };
+            string[] filenames = new string[] { simPath + "output" };
             foreach (string e in filenames)
             {
                 StreamReader file = new StreamReader(e + ".txt");
