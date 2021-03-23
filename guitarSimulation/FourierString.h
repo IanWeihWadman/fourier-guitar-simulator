@@ -118,7 +118,6 @@ private:
 	int updatesPerSubdivision;
 	std::vector<double> naturalDamping;
 	std::vector<double> addedDamping;
-	double nextParamUpdate;
 	void parseMusicFiles(std::string fileName);
 	double updateState();
 	void updateParameters(double weight);

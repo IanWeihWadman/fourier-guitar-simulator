@@ -74,6 +74,7 @@ FourierString::FourierString(int tones, int number, std::string fileName)
 	oldTensionMod = 0;
 	pulloffForce = 0;
 	currentPickForce = 0;
+	currentTensionMod = 0;
 	for (int i = 0; i < overtones; i++) {
 		tensionModifiers[i] = (i + 1) * (i + 1) * ( 1 - tensionDecrease * i * i / (double) (overtones * overtones));
 	}
@@ -568,19 +569,22 @@ void FourierString::simulate(std::string file)
 	double time = 0;
 	double output = 0;
 	double weight = 0;
+	double nextParamUpdate = 0;
 	std::ofstream outFile(file);
 	double newStep = 0;
-	for (int currentStep = 0; currentStep < totalMusicLength + 22050; currentStep++) {
-		newStep = 0;
-		time = getMeasureTimeFromStep(currentStep);
-		if (time >= nextParamUpdate) {
-			nextParamUpdate += 1 / (double)updatesPerSubdivision;
-			computeNewParameters(currentStep);
+	if (picking.size() != 0) {
+		for (int currentStep = 0; currentStep < totalMusicLength + 22050; currentStep++) {
+			newStep = 0;
+			time = getMeasureTimeFromStep(currentStep);
+			if (time >= nextParamUpdate) {
+				nextParamUpdate += 1 / (double)updatesPerSubdivision;
+				computeNewParameters(currentStep);
+			}
+			weight = (double)updatesPerSubdivision * (time - nextParamUpdate + 1 / (double)updatesPerSubdivision);
+			updateParameters(weight);
+			newStep = updateState();
+			outFile << newStep << " , ";
 		}
-		weight = (double)updatesPerSubdivision * (time - nextParamUpdate + 1 / (double)updatesPerSubdivision);
-		updateParameters(weight);
-		newStep = updateState();
-		outFile << newStep << " , ";
 	}
 	outFile.close();
 }
