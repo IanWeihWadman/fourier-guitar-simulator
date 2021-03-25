@@ -209,7 +209,7 @@ namespace TabParser
                     {
                         if (currentFret[e.Item4][j] == -1)
                         {
-                            muteEnd = j;
+                            muteEnd = j + 1;
                         }
                         else
                         {
