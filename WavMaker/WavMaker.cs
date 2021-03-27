@@ -12,10 +12,10 @@ namespace WavMaker
     {
         static void Main(string[] args)
         {
-            string songName = (args.Length == 1) ? args[0] : Console.ReadLine();
+            string songPath = (args.Length == 1) ? args[0] : Console.ReadLine();
+            string songName = Path.GetFileNameWithoutExtension(songPath);
             string simPath = "simOut\\" + songName + "\\";
-            //string[] filenames = new string[] { simPath + "output", simPath + "EFile", simPath + "AFile", simPath + "DFile", simPath + "GFile", simPath + "BFile", simPath + "HighEFile" };
-            string[] filenames = new string[] { simPath + "output" };
+            string[] filenames = new string[] { simPath + "output" }; // TODO doesn't this mean the following loop should be removed?
             foreach (string e in filenames)
             {
                 StreamReader file = new StreamReader(e + ".txt");
