@@ -1,3 +1,4 @@
+@echo off
 REM %1 is tabs file name
 
 SET config=Release
