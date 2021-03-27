@@ -418,8 +418,6 @@ void FourierString::parseMusicFiles(std::string fileName)
 				int duration;
 				int string;
 				double vibrato;
-				double width;
-				double location;
 				char equal = 0;
 				while (equal != '=') {
 					inStream >> equal;
@@ -606,7 +604,7 @@ void FourierString::computeNewParameters(int currentStep)
 	pickDisruption.assign(overtones, 0);
 	pickResponse.assign(overtones, 0);
 	//Finds any active fretting instructions and calculates the currentFret
-	for (int i = 0; i < fretting.size(); i++) {
+	for (int i = 0; i < (int) fretting.size(); i++) {
 		if (fretting[i].start <= time && fretting[i].end >= time) {
 			if (fretting[i].fretPosition > currentFret) {
 				currentFret = fretting[i].fretPosition;
@@ -616,13 +614,13 @@ void FourierString::computeNewParameters(int currentStep)
 	//fretScale accounts for the change in the effective "length" of the string when a fret is held
 	double fretScale = pow(2, currentFret / (double) 12);
 	//Any fretting instructions that ended recently are checked to see if they include an instruction for a pull-off
-	for (int i = 0; i < fretting.size(); i++) {
+	for (int i = 0; i < (int) fretting.size(); i++) {
 		if (fretting[i].end <= time && getStepFromMeasureTime(fretting[i].end) + 300 >= currentStep && fretting[i].pull != 0) {
 			pulloffForce = 0.002 * fretting[i].pull;
 		}
 	}
 	//Checks for any active muting instructions
-	for (int i = 0; i < muting.size(); i++) {
+	for (int i = 0; i < (int) muting.size(); i++) {
 		//Muting starts slightly "too early" and fades in linearly, this avoids too much sudden change in tone
 		if (muting[i].start - 0.5 <= time && muting[i].end - 0.1 >= time) {
 			double press = 3;
@@ -636,7 +634,7 @@ void FourierString::computeNewParameters(int currentStep)
 		}
 	}
 	//Checks for any active bending instructions
-	for (int i = 0; i < bending.size(); i++) {
+	for (int i = 0; i < (int) bending.size(); i++) {
 		if (bending[i].start <= time && bending[i].start + bending[i].duration >= time) {
 			if (bending[i].vibPolys.size() != 0) {
 				//This handles vibrato, calls spline to interpolate the magnitude of vibrato from the discrete values of vibPolys
@@ -650,7 +648,7 @@ void FourierString::computeNewParameters(int currentStep)
 		}
 	}
 	//Checks for active picking instructions
-	for (int i = 0; i < picking.size(); i++) {
+	for (int i = 0; i < (int) picking.size(); i++) {
 		if (getStepFromMeasureTime(picking[i].start) - 200 <= currentStep && getStepFromMeasureTime(picking[i].start) + picking[i].delay - 200 <= currentStep
 			&& getStepFromMeasureTime(picking[i].start) + 100 + picking[i].delay >= currentStep) {
 			//Picking starts slightly "too early" so that the string is released and the tone produced closer to the actual beat
@@ -685,7 +683,7 @@ double FourierString::spline(const std::vector<double>& points, double input)
 		double output = 0;
 		double total = 0;
 		double normalize = 0;
-		for (int i = 0; i < points.size(); i++) {
+		for (int i = 0; i < (int) points.size(); i++) {
 			//250 is a magic number tuned to produce appropriate transition speeds for bends and vibrato
 			normalize = 1.0 / (1 + 250 * (scale * input - i) * (scale * input - i));
 			output += points[i] * normalize;
