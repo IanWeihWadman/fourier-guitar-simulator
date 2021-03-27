@@ -8,7 +8,11 @@ FourierString::FourierString(int tones, int number, std::string fileName)
 	overtones = tones;
 	stringNumber = number;
 	//Default values, usually overwritten when parseMusicFiles is called
-	int fretCount = 21;
+	int fretCount = 20;
+	bars = 1;
+	tempo = 1;
+	subdivision = 1;
+	updatesPerSubdivision = 1;
 	highFretDamping = 0.05;
 	quadraticDamping = 0.1;
 	linearDamping = 0.1;

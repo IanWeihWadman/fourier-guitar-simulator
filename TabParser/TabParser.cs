@@ -28,7 +28,7 @@ namespace TabParser
                 line = reader.ReadLine();
                 if (lineIndex == -2)
                 {
-                    line = "{ " + line;
+                    line = "{ " + line.ToLower();
                     line = line.Replace(",", " } { ");
                     line = line + " } ";
                     writer.Write(line.Replace("{  }", ""));
