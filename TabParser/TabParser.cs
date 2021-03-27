@@ -8,6 +8,21 @@ namespace TabParser
     {
         private const char whiteSpace = (char)32;
 
+        class fret
+        {
+            public fret(int startIn, int endIn, int locationIn, int strIn)
+            {
+                start = startIn;
+                end = endIn;
+                location = locationIn;
+                str = strIn;
+            }
+            public int start;
+            public int end;
+            public int location;
+            public int str;
+        }
+
         static void Main(string[] args)
         {
             string Filename = (args.Length == 1) ? args[0] : Console.ReadLine();
@@ -28,7 +43,7 @@ namespace TabParser
                 line = reader.ReadLine();
                 if (lineIndex == -2)
                 {
-                    line = "{ " + line;
+                    line = "{ " + line.ToLower();
                     line = line.Replace(",", " } { ");
                     line = line + " } ";
                     writer.Write(line.Replace("{  }", ""));
@@ -45,11 +60,14 @@ namespace TabParser
                 }
                 lineIndex++;
             }
+            //Tracks current fret being held at every subdivision on each string
             List<List<int>> currentFret = new List<List<int>>();
+            //Strings for all extra data, indexed by string and by subdivision
             List<List<string>> specialInstructions = new List<List<string>>();
+            //Emphasis of each subdivision
             List<int> emphases = new List<int>();
-            List<int> foreFingerPosition = new List<int>();
-            List<Tuple<int, int, int, int>> fretting = new List<Tuple<int, int, int, int>>();
+            //List of all fret instructions in the form of the fret class
+            List<fret> fretting = new List<fret>();
             for (int i = 0; i < 6; i++)
             {
                 specialInstructions.Add(new List<string>());
@@ -102,21 +120,6 @@ namespace TabParser
                         lowestCurrent = currentFret[i][j];
                     }
                 }
-                if (lowestCurrent == 100)
-                {
-                    if (j == 0)
-                    {
-                        foreFingerPosition.Add(0);
-                    }
-                    else
-                    {
-                        foreFingerPosition.Add(foreFingerPosition[j - 1]);
-                    }
-                }
-                else
-                {
-                    foreFingerPosition.Add(lowestCurrent);
-                }
             }
             for (int j = 0; j < information[8].Count; j++)
             {
@@ -142,7 +145,7 @@ namespace TabParser
                         end = j;
                         if (start != end)
                         {
-                            fretting.Add(new Tuple<int, int, int, int>(start, end, change, i));
+                            fretting.Add(new fret(start, end, change, i));
                         }
                         start = j;
                         change = currentFret[i][j];
@@ -151,63 +154,63 @@ namespace TabParser
                 end = currentFret[i].Count;
                 if (start != end)
                 {
-                    fretting.Add(new Tuple<int, int, int, int>(start, end, change, i));
+                    fretting.Add(new fret(start, end, change, i));
                 }
             }
-            foreach (Tuple<int, int, int, int> e in fretting)
+            foreach (fret e in fretting)
             {
                 double pull = 0;
-                if (e.Item3 != -1)
+                if (e.location != -1)
                 {
-                    Tuple<int, int, int, int> next = new Tuple<int, int, int, int>(0, 0, 0, -1);
-                    foreach (Tuple<int, int, int, int> f in fretting)
+                    fret next = new fret(0, 0, 0, -1);
+                    foreach (fret f in fretting)
                     {
-                        if (f.Item4 == e.Item4 && f.Item1 == e.Item2)
+                        if (f.str == e.str && f.start == e.start)
                         {
                             next = f;
                         }
                     }
-                    if (next.Item4 != -1 && specialInstructions[next.Item4][next.Item1].Contains("p"))
+                    if (next.str != -1 && specialInstructions[next.str][next.start].Contains("p"))
                     {
-                        pull = emphases[next.Item1];
-                        if (!specialInstructions[next.Item4][next.Item1].Contains("b"))
+                        pull = emphases[next.start];
+                        if (!specialInstructions[next.str][next.start].Contains("b"))
                         {
-                            double[] bend = new double[e.Item2 - e.Item1 + 1];
-                            bend[e.Item2 - e.Item1] = 0.25;
-                            writer.Write(bendString(e.Item1, e.Item2 - e.Item1, e.Item4, 0, bend));
+                            double[] bend = new double[e.end - e.start + 1];
+                            bend[e.end - e.start] = 0.25;
+                            writer.Write(bendString(e.start, e.end - e.start, e.str, 0, bend));
                         }
                     }
-                    if (next.Item4 != -1 && specialInstructions[e.Item4][next.Item1].Contains("s"))
+                    if (next.str != -1 && specialInstructions[e.str][next.start].Contains("s"))
                     {
-                        int diff = next.Item3 - e.Item3;
+                        int diff = next.location - e.location;
                         double step = 1 / (double)Math.Abs(diff);
-                        writer.Write(fretString(e.Item1, e.Item2 - 1 + step, e.Item3, e.Item4, pull));
+                        writer.Write(fretString(e.start, e.end - 1 + step, e.location, e.str, pull));
                         for (int i = 1; i < Math.Abs(diff); i++)
                         {
-                            writer.Write(fretString(next.Item1 - 1 + i * step, next.Item1 - 1 + (i + 1) * step, e.Item3 + i * Math.Sign(diff), e.Item4, 0));
+                            writer.Write(fretString(next.start - 1 + i * step, next.start - 1 + (i + 1) * step, e.location + i * Math.Sign(diff), e.str, 0));
                         }
                     }
-                    else if (next.Item3 != -1)
+                    else if (next.location != -1)
                     {
-                        writer.Write(fretString(e.Item1, e.Item2, e.Item3, e.Item4, pull));
+                        writer.Write(fretString(e.start, e.end, e.location, e.str, pull));
                     }
                     else
                     {
-                        writer.Write(fretString(e.Item1, e.Item2 + 0.75, e.Item3, e.Item4, pull));
+                        writer.Write(fretString(e.start, e.end + 0.75, e.location, e.str, pull));
                     }
                 }
                 else
                 {
                     double mute = 0;
-                    string[] breakdown = specialInstructions[e.Item4][e.Item1].Split(' ');
+                    string[] breakdown = specialInstructions[e.str][e.start].Split(' ');
                     if (( breakdown.Length < 2 ) || !double.TryParse(breakdown[1], out mute))
                     {
                         mute = 24;
                     }
-                    int muteEnd = e.Item1 + 1;
-                    for (int j = e.Item1; j < specialInstructions[0].Count; j++)
+                    int muteEnd = e.start + 1;
+                    for (int j = e.start; j < specialInstructions[0].Count; j++)
                     {
-                        if (currentFret[e.Item4][j] == -1)
+                        if (currentFret[e.str][j] == -1)
                         {
                             muteEnd = j + 1;
                         }
@@ -216,7 +219,8 @@ namespace TabParser
                             break;
                         }
                     }
-                    writer.Write(muteString(e.Item1, muteEnd, e.Item4, mute, 0.4, (fretLocations[foreFingerPosition[e.Item1]] - 0.1)));
+                    //Experimental, muting at constant location may cause problems
+                    writer.Write(muteString(e.start, muteEnd, e.str, mute, 0.4, 0.1));
                 }
             }
             for (int i = 0; i < emphases.Count; i++)
@@ -311,19 +315,19 @@ namespace TabParser
                     }
                 }
             }
-            foreach (Tuple<int, int, int, int> e in fretting)
+            foreach (fret e in fretting)
             {
-                if (specialInstructions[e.Item4][e.Item1].Contains("b"))
+                if (specialInstructions[e.str][e.start].Contains("b"))
                 {
                     double current = 0;
-                    int duration = e.Item2 - e.Item1;
+                    int duration = e.end - e.start;
                     double[] bend = new double[duration + 1];
                     for (int i = 0; i < duration; i++)
                     {
-                        if (specialInstructions[e.Item4][e.Item1 + i].Contains("b"))
+                        if (specialInstructions[e.str][e.start + i].Contains("b"))
                         {
                             int b = 0;
-                            string[] breakdown = specialInstructions[e.Item4][e.Item1 + i].Split((char)whiteSpace);
+                            string[] breakdown = specialInstructions[e.str][e.start + i].Split((char)whiteSpace);
                             for (int j = 0; j < breakdown.Length; j++)
                             {
                                 if (breakdown[j] == "b")
@@ -336,7 +340,7 @@ namespace TabParser
                         }
                         bend[i] = current;
                     }
-                    writer.Write(bendString(e.Item1, duration, e.Item4, 0.6, bend));
+                    writer.Write(bendString(e.start, duration, e.str, 0.6, bend));
                 }
             }
             for (int j = 0; j < 6; j++)
