@@ -36,7 +36,8 @@ namespace TabParser
                 currentLocation *= (1 - 1 / 17.817);
             }
             StreamReader reader = new StreamReader("rawSongFiles\\"+Filename);
-            StreamWriter writer = new StreamWriter("parseOut\\"+Filename+".out");
+            string songName = Path.GetFileNameWithoutExtension(Filename);
+            StreamWriter writer = new StreamWriter("parseOut\\"+songName+".out");
             string line = "";
             int lineIndex = -2;
             //This vector of vectors contains the raw values read from the file as strings

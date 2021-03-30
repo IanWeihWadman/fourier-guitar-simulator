@@ -3,33 +3,45 @@
 #include <filesystem>
 #include "FourierString.h"
 #include "Amplifier.h"
+
+namespace fs = std::filesystem;
+
 int main(int argc, char** argv)
 {
-	std::string filePath;
-	std::string fileName;
+	//std::string filePath;
+	std::string songName;
+	std::string fileNameString;
 	std::string outputDir;
 	if (argc == 2)
 	{
-		fileName = argv[1];
+		fileNameString = argv[1];
 	}
 	else
 	{
-		std::cin >> fileName;
+		std::cin >> fileNameString;
 	}
-	filePath = "parseOut\\" + fileName + ".out";
-	outputDir = "simOut\\" + fileName + "\\";
-	std::filesystem::path outputPath(outputDir);
-	std::cout << "CWD: " + std::filesystem::current_path().string(); +"\n";
-	std::filesystem::create_directory(outputDir);
-	if (std::filesystem::exists(filePath))
+	fs::path filePath(fileNameString);
+	songName = filePath.filename().stem().string();
+	outputDir = "simOut\\" + songName + "\\";
+	std::string inputPathString = "parseOut\\" + songName + ".out";
+	
+	std::cout << "CWD: " + fs::current_path().string(); +"\n";
+	fs::create_directory(outputDir);
+	if (fs::exists(inputPathString))
 	{
-		FourierString AString(180, 1, filePath);
+		FourierString AString(180, 1, inputPathString);
 		int totalLength = AString.totalMusicLength;
-		FourierString BString(120, 4, filePath);
-		FourierString DString(160, 2, filePath);
-		FourierString highEString(100, 5, filePath);
-		FourierString EString(200, 0, filePath);
-		FourierString GString(140, 3, filePath);
+		FourierString BString(120, 4, inputPathString);
+		FourierString DString(160, 2, inputPathString);
+		FourierString highEString(100, 5, inputPathString);
+		FourierString EString(200, 0, inputPathString);
+		FourierString GString(140, 3, inputPathString);
+
+	
+
+	
+
+	
 		std::thread EThread(&FourierString::simulate, &EString, outputDir + "EFile.txt");
 		std::thread AThread(&FourierString::simulate, &AString, outputDir + "AFile.txt");
 		std::thread DThread(&FourierString::simulate, &DString, outputDir + "DFile.txt");
@@ -81,7 +93,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		std::cout << filePath + " not found\n";
+		std::cout << inputPathString + " not found\n";
 	}
 }
 
