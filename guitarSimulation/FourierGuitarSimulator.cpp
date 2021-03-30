@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 			output << processedValue << ", ";
 		}
 		output.close();*/
-		Amplifier amp(outputDir + "EFile.txt", outputDir + "AFile.txt", outputDir + "DFile.txt", outputDir + "GFile.txt", outputDir + "BFile.txt", outputDir + "HighEFile.txt", outputDir + "output.txt", totalLength);
+		Amplifier amp(outputDir + "EFile.txt", outputDir + "AFile.txt", outputDir + "DFile.txt", outputDir + "GFile.txt", outputDir + "BFile.txt", outputDir + "HighEFile.txt", outputDir + "output.txt", AString.getAmpPreset(), totalLength);
 	}
 	else
 	{

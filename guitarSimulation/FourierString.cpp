@@ -31,6 +31,7 @@ FourierString::FourierString(int tones, int number, std::string fileName)
 	tensionDecrease = 0.45;
 	acoustic = 0;
 	stepsPerSample = 16;
+	ampPreset = "clean";
 	if (stringNumber == 0) {
 		frequency = 82.4;
 	}
@@ -120,6 +121,10 @@ FourierString::FourierString(int tones, int number, std::string fileName)
 		}
 		fretChangeMatrix.push_back(nextMatrixSet);
 	}
+}
+
+std::string FourierString::getAmpPreset() {
+	return ampPreset;
 }
 
 void FourierString::parseMusicFiles(std::string fileName)
@@ -264,6 +269,9 @@ void FourierString::parseMusicFiles(std::string fileName)
 			}
 			if (dataType == "acoustic") {
 				inStream >> acoustic;
+			}
+			if (dataType == "amppreset") {
+				inStream >> ampPreset;
 			}
 			if (dataType == "string0freq") {
 				double freq;

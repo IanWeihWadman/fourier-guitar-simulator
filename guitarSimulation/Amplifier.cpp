@@ -1,28 +1,47 @@
 #include "Amplifier.h"
 
-Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, std::string File4, std::string File5, std::string File6, std::string outFile, int totalLength)
+Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, std::string File4, std::string File5, std::string File6, std::string outFile, std::string presetFile, int totalLength)
 {
 	double timeStep = 1 / (double)(44100);
-	double bandClip = 0;
+	double bandClip = 0.8;
 	double stringAddition;
 	double value = 0;
 	double processedValue = 0;
 	double splitValue = 0;
-	double compress = 0.8;
+	double compress = 0.5;
 	double threshold = 1;
-	double gain = 80;
-	double linearGain = 0;
-	double hardClip = 0.8;
-	int bandSpread = 400;
-	int bands = 4;
+	double gain = 1.2;
+	double linearGain = 0.2;
+	double hardClip = 1;
+	int lowestFreq = 400;
+	int linearSpread = 3000;
+	int quadraticSpread = 450;
+	int bands = 5;
 	int filterWindow = 100;
-	int comb = 0;
-	int combWidth = 4;
-	double postGain = 0.5;
-	double linearMix = -0.25;
-	//double feedbackPower = 10;
-	double feedbackPower = 0;
-	double feedbackWavelength = 100;
+	int comb = 5;
+	int combWidth = 5;
+	double postGain = 1.2;
+	double linearMix = 0;
+	double feedbackPower = 1;
+	double feedbackWavelength = 70;
+	std::ifstream presetStream("guitarSimulation\\amppresets\\" + presetFile + ".txt");
+	presetStream >> bandClip;
+	presetStream >> compress;
+	presetStream >> threshold;
+	presetStream >> gain;
+	presetStream >> linearGain;
+	presetStream >> hardClip;
+	presetStream >> lowestFreq;
+	presetStream >> linearSpread;
+	presetStream >> quadraticSpread;
+	presetStream >> bands;
+	presetStream >> filterWindow;
+	presetStream >> comb;
+	presetStream >> combWidth;
+	presetStream >> postGain;
+	presetStream >> linearMix;
+	presetStream >> feedbackPower;
+	presetStream >> feedbackWavelength;
 	std::ifstream EStream(File1);
 	std::ifstream AStream(File2);
 	std::ifstream DStream(File3);
@@ -70,7 +89,7 @@ Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, st
 				double splitValue = 0;
 				splitValue += window[399];
 				for (int j = 0; j < filterWindow; j++) {
-					splitValue += window[399 - j] * sin(timeStep * (399.0 - j) * 100) * cos((500 + ((double) bandSpread * k * k + 5000.0 * k)) * timeStep * j) / (399.0 - j);
+					splitValue += window[399 - j] * sin(timeStep * (399.0 - j) * 400 / (1 + bands)) * cos((lowestFreq + ((double) quadraticSpread * k * k + linearSpread * k)) * timeStep * j) / (399.0 - j);
 				}
 				splitValue *= gain + k * linearGain;
 				splitValue = splitValue / (1 + abs(splitValue));
@@ -87,14 +106,16 @@ Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, st
 		if (i % 10000 == 0) {
 			std::cout << i * timeStep << " seconds logged.\r\n";
 		}
-		double amplitude = 0;
-		for (int j = 0; j < 399; j++) {
-			amplitude += outputWindow[j] * outputWindow[j] / (50.0 + j);
+		if (compress != 0) {
+			double amplitude = 0;
+			for (int j = 0; j < 399; j++) {
+				amplitude += outputWindow[j] * outputWindow[j] / (50.0 + j);
+			}
+			if (amplitude < threshold) {
+				amplitude = threshold;
+			}
+			processedValue *= threshold * compress / amplitude + 1 - compress;
 		}
-		if (amplitude < threshold) {
-			amplitude = threshold;
-		}
-		processedValue *= threshold * compress / amplitude + 1 - compress;
 		if (processedValue > 1 / postGain) {
 			processedValue = 1 / postGain;
 		}
