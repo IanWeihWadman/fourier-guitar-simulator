@@ -207,96 +207,96 @@ void FourierString::parseMusicFiles(std::string fileName)
 			if (dataType == "subdivisions") {
 				inStream >> subdivision;
 			}
-			if (dataType == "updateFrequency") {
+			if (dataType == "updatefrequency") {
 				inStream >> updatesPerSubdivision;
 			}
-			if (dataType == "highFretDamping") {
+			if (dataType == "highfretdamping") {
 				inStream >> highFretDamping;
 			}
-			if (dataType == "quadraticDamping") {
+			if (dataType == "quadraticdamping") {
 				inStream >> quadraticDamping;
 			}
-			if (dataType == "linearDamping") {
+			if (dataType == "lineardamping") {
 				inStream >> linearDamping;
 			}
-			if (dataType == "constantDamping") {
+			if (dataType == "constantdamping") {
 				inStream >> constantDamping;
 			}
-			if (dataType == "overallNonlinearity") {
+			if (dataType == "overallnonlinearity") {
 				inStream >> overallNonlinearity;
 			}
-			if (dataType == "highFrequencyNonlinearity") {
+			if (dataType == "highfrequencynonlinearity") {
 				inStream >> highFrequencyNonlinearity;
 			}
-			if (dataType == "pickingWidth") {
+			if (dataType == "pickingwidth") {
 				inStream >> pickingWidth;
 			}
-			if (dataType == "pickHardness") {
+			if (dataType == "pickhardness") {
 				inStream >> pickHardness;
 			}
-			if (dataType == "pickScratch") {
+			if (dataType == "pickscratch") {
 				inStream >> pickScratch;
 			}
-			if (dataType == "pickingLocation") {
+			if (dataType == "pickinglocation") {
 				inStream >> pickingLocation;
 			}
-			if (dataType == "linearMuting") {
+			if (dataType == "linearmuting") {
 				inStream >> linearMuting;
 			}
-			if (dataType == "pickupWidth") {
+			if (dataType == "pickupwidth") {
 				inStream >> pickupWidth;
 			}
-			if (dataType == "pickupLocation") {
+			if (dataType == "pickuplocation") {
 				inStream >> pickupLocation;
 			}
-			if (dataType == "stringBrightness") {
+			if (dataType == "stringbrightness") {
 				inStream >> stringBrightness;
 			}
-			if (dataType == "resonanceNumber") {
+			if (dataType == "resonancenumber") {
 				inStream >> resonanceNum;
 			}
-			if (dataType == "tensionDecrease") {
+			if (dataType == "tensiondecrease") {
 				inStream >> tensionDecrease;
 			}
 			if (dataType == "acoustic") {
 				inStream >> acoustic;
 			}
-			if (dataType == "String0Freq") {
+			if (dataType == "string0freq") {
 				double freq;
 				inStream >> freq;
 				if (stringNumber == 0) {
 					tension = 40 * freq * freq;
 				}
 			}
-			if (dataType == "String1Freq") {
+			if (dataType == "string1freq") {
 				double freq;
 				inStream >> freq;
 				if (stringNumber == 1) {
 					tension = 40 * freq * freq;
 				}
 			}
-			if (dataType == "String2Freq") {
+			if (dataType == "string2freq") {
 				double freq;
 				inStream >> freq;
 				if (stringNumber == 2) {
 					tension = 40 * freq * freq;
 				}
 			}
-			if (dataType == "String3Freq") {
+			if (dataType == "string3freq") {
 				double freq;
 				inStream >> freq;
 				if (stringNumber == 3) {
 					tension = 40 * freq * freq;
 				}
 			}
-			if (dataType == "String4Freq") {
+			if (dataType == "string4freq") {
 				double freq;
 				inStream >> freq;
 				if (stringNumber == 4) {
 					tension = 40 * freq * freq;
 				}
 			}
-			if (dataType == "String5Freq") {
+			if (dataType == "string5freq") {
 				double freq;
 				inStream >> freq;
 				if (stringNumber == 5) {
@@ -414,8 +414,8 @@ void FourierString::parseMusicFiles(std::string fileName)
 				int duration;
 				int string;
 				double vibrato;
-				double width;
 				double location;
+				double vibspeed;
 				char equal = 0;
 				while (equal != '=') {
 					inStream >> equal;
@@ -437,6 +437,11 @@ void FourierString::parseMusicFiles(std::string fileName)
 				}
 				inStream >> vibrato;
 				equal = 0;
+				while (equal != '=') {
+					inStream >> equal;
+				}
+				inStream >> vibspeed;
+				equal = 0;
 				while (equal != '[') {
 					inStream >> equal;
 				}
@@ -453,9 +458,8 @@ void FourierString::parseMusicFiles(std::string fileName)
 					inStream >> equal;
 					inBend.push_back(bendValue);
 				}
-				inBend.push_back(0);
 				if (string == stringNumber) {
-					bending.push_back(bend(start, duration, 600, inVib, inBend));
+					bending.push_back(bend(start, duration, vibspeed, inVib, inBend));
 				}
 			}
 		}
@@ -634,9 +638,9 @@ void FourierString::computeNewParameters(int currentStep)
 	//Checks for any active bending instructions
 	for (int i = 0; i < bending.size(); i++) {
 		if (bending[i].start <= time && bending[i].start + bending[i].duration >= time) {
-			if (bending[i].vibPolys.size() != 0) {
+			if (bending[i].vibSpeed != 0 && bending[i].vibPolys.size() != 0) {
 				//This handles vibrato, calls spline to interpolate the magnitude of vibrato from the discrete values of vibPolys
-				newTensionMod += tension * 0.016 * spline(bending[i].vibPolys, (time - bending[i].start) / (double)bending[i].duration) * (1 +  sin(0.5 * currentStep / (double)bending[i].vibSpeed));
+				newTensionMod += tension * 0.016 * spline(bending[i].vibPolys, (time - bending[i].start) / (double)bending[i].duration) * (1 + sin(0.3183 * currentStep / (double)bending[i].vibSpeed));
 			}
 			if (bending[i].bendPolys.size() != 0) {
 				//This handles bends, calls spline to interpolate the depth of the bend from the discrete values of bendPolys

@@ -29,11 +29,7 @@ int main(int argc, char** argv)
 		FourierString DString(160, 2, filePath);
 		FourierString highEString(100, 5, filePath);
 		FourierString EString(200, 0, filePath);
-
 		FourierString GString(140, 3, filePath);
-
-
-	
 		std::thread EThread(&FourierString::simulate, &EString, outputDir + "EFile.txt");
 		std::thread AThread(&FourierString::simulate, &AString, outputDir + "AFile.txt");
 		std::thread DThread(&FourierString::simulate, &DString, outputDir + "DFile.txt");
