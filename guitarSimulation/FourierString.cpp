@@ -52,8 +52,8 @@ FourierString::FourierString(int tones, int number, std::string fileName)
 	//I don't know where 40 comes from, but it seems to be a magic number that gets the correct tuning. Probably not exactly right but I will come back later
 	tension = 40 * frequency * frequency;
 	parseMusicFiles(fileName);
-	totalMusicLength = 44100 * bars / tempo + 10000;
-	timeStep = 1 / (double) (44100 * stepsPerSample);
+	totalMusicLength = (int) (44100.0 * bars / tempo) + 10000;
+	timeStep = 1 / (double) (44100.0 * stepsPerSample);
 	pickDisruption.assign(overtones, 0);
 	State.assign(overtones, 0);
 	Derivative.assign(overtones, 0);
@@ -80,11 +80,11 @@ FourierString::FourierString(int tones, int number, std::string fileName)
 	currentPickForce = 0;
 	currentTensionMod = 0;
 	for (int i = 0; i < overtones; i++) {
-		tensionModifiers[i] = (i + 1) * (i + 1) * ( 1 - tensionDecrease * i * i / (double) (overtones * overtones));
+		tensionModifiers[i] = ((double) i + 1) * ((double) i + 1) * ( 1 - tensionDecrease * i * i / ((double) overtones * overtones));
 	}
 	for (int i = 0; i < resonanceNum; i++) {
 		resonanceDamping[i] = 3 - i * 2.5 / (double) resonanceNum;
-		resonanceFrequencies[i] = 30000 + 6000 * i + 700 * sqrt(i);
+		resonanceFrequencies[i] = 30000.0 + 6000.0 * i + 700.0 * sqrt(i);
 	}
 	//Every pair of frets has a matrix associated with the transition between those two frets representing a linear transformation on the Fourier coefficients of the state
 	for (int p = 0; p < fretCount; p++) {
@@ -99,7 +99,7 @@ FourierString::FourierString(int tones, int number, std::string fileName)
 				nextMatrix.push_back(nextVec);
 				//Each matrix starts out identical. These are not the mathematically correct values for this transition matrix, but they are simpler and I found it makes no difference to the sound
 				for (int j = 0; j < overtones; j++) {
-					nextMatrix[i][j] = 1 / (double) ( 1 + (i - j) * (i - j));
+					nextMatrix[i][j] = 1 / ( 1 + ((double) i - j) * ((double) i - j));
 				}
 			}
 			//This section rescales the transition matrices to guarantee that the pickup response is the same before and after the fret change, avoiding clicking sounds
@@ -418,7 +418,6 @@ void FourierString::parseMusicFiles(std::string fileName)
 				int duration;
 				int string;
 				double vibrato;
-				double location;
 				double vibspeed;
 				char equal = 0;
 				while (equal != '=') {
@@ -463,7 +462,7 @@ void FourierString::parseMusicFiles(std::string fileName)
 					inBend.push_back(bendValue);
 				}
 				if (string == stringNumber) {
-					bending.push_back(bend(start, duration, vibspeed, inVib, inBend));
+					bending.push_back(bend(start, duration, (int) vibspeed, inVib, inBend));
 				}
 			}
 		}
@@ -528,12 +527,12 @@ double FourierString::updateState()
 			if (currentPickForce != 0) {
 				double pickSpot = 0;
 				for (int i = 0; i < overtones; i++) {
-					pickSpot += sin((pickingLocation + 0.003 * q) * 3.1415 * (i + 1) * fretScale) * State[i] * (pickingWidth + pickHardness * i + pickScratch * i * i);
+					pickSpot += sin((pickingLocation + 0.003 * q) * 3.1415 * ((double) i + 1) * fretScale) * State[i] * (pickingWidth + pickHardness * i + pickScratch * i * i);
 				}
 				if (pickSpot < currentPickForce) {
 					for (int i = 0; i < overtones; i++) {
 						//Force is boosted somewhat when tension is high to overcome the resistance due to string tension
-						Derivative[i] += sin( (pickingLocation + 0.003 * q) * fretScale * 3.1415 * (i + 1)) * (500000 + tension + effectiveTension) * (pickingWidth + pickHardness * i + pickScratch * i * i) / 800000000;
+						Derivative[i] += sin( (pickingLocation + 0.003 * q) * fretScale * 3.1415 * ((double) i + 1)) * (500000 + tension + effectiveTension) * (pickingWidth + pickHardness * i + pickScratch * i * i) / 800000000;
 					}
 				}
 			}
@@ -541,7 +540,7 @@ double FourierString::updateState()
 		//Pull-offs are described by a milder force proportional to the distance between the state and a target value
 		if (pulloffForce != 0) {
 			for (int i = 0; i < overtones; i++) {
-				Derivative[i] += 0.1 * (500000 + tension + effectiveTension) * (pulloffForce - State[i]) * (20 + i) / 800000000;
+				Derivative[i] += 0.1 * (500000 + tension + effectiveTension) * (pulloffForce - State[i]) * (20.0 + i) / 800000000;
 			}
 		}
 	}
@@ -635,13 +634,13 @@ void FourierString::computeNewParameters(int currentStep)
 			}
 			for (int j = 0; j < overtones; j++) {
 				//The amount of muting varies depending whether the muting point is a peak or node of the overtone in question, this is important for artificial harmonics
-				addedDamping[j] += press * muting[i].damp * (muting[i].width * (1 + linearMuting * j) + abs(sin(3.1415 * (j + 1) * muting[i].location * fretScale)));
+				addedDamping[j] += press * muting[i].damp * (muting[i].width * (1 + linearMuting * j) + abs(sin(3.1415 * ((double) j + 1) * muting[i].location * fretScale)));
 			}
 		}
 	}
 	//Checks for any active bending instructions
 	for (int i = 0; i < (int) bending.size(); i++) {
-		if (bending[i].start <= time && bending[i].start + bending[i].duration >= time) {
+		if (bending[i].start <= time && (double)bending[i].start + (double)bending[i].duration >= time) {
 			if (bending[i].vibSpeed != 0 && bending[i].vibPolys.size() != 0) {
 				//This handles vibrato, calls spline to interpolate the magnitude of vibrato from the discrete values of vibPolys
 				newTensionMod += tension * 0.016 * spline(bending[i].vibPolys, (time - bending[i].start) / (double)bending[i].duration) * (1 + sin(0.3183 * currentStep / (double)bending[i].vibSpeed));
@@ -658,7 +657,7 @@ void FourierString::computeNewParameters(int currentStep)
 		if (getStepFromMeasureTime(picking[i].start) - 200 <= currentStep && getStepFromMeasureTime(picking[i].start) + picking[i].delay - 200 <= currentStep
 			&& getStepFromMeasureTime(picking[i].start) + 100 + picking[i].delay >= currentStep) {
 			//Picking starts slightly "too early" so that the string is released and the tone produced closer to the actual beat
-			newPickForce = (currentStep - getStepFromMeasureTime(picking[i].start) - picking[i].delay + 50) * 0.1 * picking[i].force / 150;
+			newPickForce = ((double) currentStep - getStepFromMeasureTime(picking[i].start) - picking[i].delay + 50) * 0.1 * picking[i].force / 150;
 		}
 	}
 	//Natural damping is the inherent damping of the string, if the parameter highFretDamping is non-zero the natural damping increases when the string is fretted high
@@ -706,5 +705,5 @@ double FourierString::spline(const std::vector<double>& points, double input)
 double FourierString::pickupResponse(double fretScale, int overtone) {
 	//This function captures the effect of the pickup if the acoustic parameter is non-zero
 	//The location of the pickup relative to the peaks and nodes of each frequency varies with fret, so fretScale must be passed to this function
-	return 4 * (1 - acoustic) * (pickupWidth / (1 + overtone) + abs(sin(fretScale * 3.1415 * pickupLocation * (overtone + 1)))) * ( 1 + stringBrightness * overtone / (double) 100 ) + 3 * acoustic;
+	return 4 * (1 - acoustic) * (pickupWidth / (1.0 + overtone) + abs(sin(fretScale * 3.1415 * pickupLocation * (1.0 + overtone)))) * ( 1 + stringBrightness * overtone / (double) 100 ) + 3 * acoustic;
 }

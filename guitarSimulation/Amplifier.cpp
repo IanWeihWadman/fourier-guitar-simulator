@@ -64,13 +64,13 @@ Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, st
 		if (bandClip != 0) {
 			window[399] = value;
 			for (int j = 0; j < 399; j++) {
-				window[399] -= (1 + sin(0.1 * j)) * feedbackPower * (outputWindow[j] / (1 + 2 * j + abs(outputWindow[j]))) * (0.7 / (1 + 0.1 * (j - 399 + 20 + feedbackWavelength) * (j - 399 + 20 + feedbackWavelength)) + 1 / (1 + 0.1 * (j - 399 + feedbackWavelength) * (j - 399 + feedbackWavelength)));
+				window[399] -= (1 + sin(0.1 * j)) * feedbackPower * (outputWindow[j] / (1.0 + 2.0 * j + abs(outputWindow[j]))) * (0.7 / (1 + 0.1 * (j - 399.0 + 20 + feedbackWavelength) * (j - 399.0 + 20 + feedbackWavelength)) + 1 / (1 + 0.1 * (j - 399.0 + feedbackWavelength) * (j - 399.0 + feedbackWavelength)));
 			}
 			for (int k = 0; k < bands; k++) {
 				double splitValue = 0;
 				splitValue += window[399];
 				for (int j = 0; j < filterWindow; j++) {
-					splitValue += window[399 - j] * sin(timeStep * (399 - j) * 100) * cos((500 + (bandSpread * k * k + 5000 * k)) * timeStep * j) / (399 - j);
+					splitValue += window[399 - j] * sin(timeStep * (399.0 - j) * 100) * cos((500 + ((double) bandSpread * k * k + 5000.0 * k)) * timeStep * j) / (399.0 - j);
 				}
 				splitValue *= gain + k * linearGain;
 				splitValue = splitValue / (1 + abs(splitValue));
@@ -89,7 +89,7 @@ Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, st
 		}
 		double amplitude = 0;
 		for (int j = 0; j < 399; j++) {
-			amplitude += outputWindow[j] * outputWindow[j] / (50 + j);
+			amplitude += outputWindow[j] * outputWindow[j] / (50.0 + j);
 		}
 		if (amplitude < threshold) {
 			amplitude = threshold;
@@ -102,9 +102,9 @@ Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, st
 			processedValue = -1 / postGain;
 		}
 		outputWindow[399] = 0.9 * postGain * processedValue;
-		processedValue /= (double)(comb + 1);
+		processedValue /= ((double) comb + 1);
 		for (int k = 1; k < comb + 1; k++) {
-			processedValue += (1 - 2 * (2 % k)) * outputWindow[399 - k * k * combWidth] / (double)(comb + 1);
+			processedValue += (1.0 - 2.0 * (2 % k)) * outputWindow[399 - k * k * combWidth] / ((double) comb + 1);
 		}
 		output << 0.9 * postGain * processedValue << " , ";
 	}
