@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	outputDir = "simOut\\" + songName + "\\";
 	std::string inputPathString = "parseOut\\" + songName + ".out";
 	
-	std::cout << "CWD: " + fs::current_path().string(); +"\n";
+	std::cout << "CWD: " + fs::current_path().string() +"\n";
 	fs::create_directory(outputDir);
 	if (fs::exists(inputPathString))
 	{
@@ -36,12 +36,6 @@ int main(int argc, char** argv)
 		FourierString highEString(100, 5, inputPathString);
 		FourierString EString(200, 0, inputPathString);
 		FourierString GString(140, 3, inputPathString);
-
-	
-
-	
-
-	
 		std::thread EThread(&FourierString::simulate, &EString, outputDir + "EFile.txt");
 		std::thread AThread(&FourierString::simulate, &AString, outputDir + "AFile.txt");
 		std::thread DThread(&FourierString::simulate, &DString, outputDir + "DFile.txt");
