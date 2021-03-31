@@ -40,6 +40,7 @@ class FourierString
 	};
 public:
 	FourierString(int tones, int number, std::string fileName);
+	std::string getAmpPreset();
 	void simulate(std::string file);
 	int totalMusicLength;
 private:
@@ -76,6 +77,7 @@ private:
 	std::vector<fret> fretting;
 	std::vector<mute> muting;
 	std::vector<bend> bending;
+	std::string ampPreset;
 	double pulloffForce;
 	double highFretDamping;
 	double quadraticDamping;
