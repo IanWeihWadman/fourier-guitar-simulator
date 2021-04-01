@@ -178,6 +178,35 @@ namespace TabParser
                         //If the next instruction is a mute, the fret is held slightly longer to avoid artifacts
                         writer.Write(fretString(e.start, e.end + 0.25, e.location, e.str, pull));
                     }
+                    if (e.special.Contains("t"))
+                    {
+                        int trill = 0;
+                        int freq = 1;
+                        int tones = 1;
+                        string[] breakdown = e.special.Split(whiteSpace);
+                        for (int j = 0; j < breakdown.Length; j++)
+                        {
+                            if (breakdown[j] == "t")
+                            {
+                                trill = j;
+                            }
+                        }
+                        if (int.TryParse(breakdown[trill + 1], out freq))
+                        {
+                            if (!int.TryParse(breakdown[trill + 2], out tones))
+                            {
+                                tones = 1;
+                            }
+                        }
+                        else
+                        {
+                            freq = 1;
+                        }
+                        for (int i = 0; i < freq * (e.end - e.start); i++)
+                        {
+                            writer.Write(fretString(e.start + 0.5 * (2 * i + 1) /(double) freq, e.start + (i + 1) /(double) freq, e.location + tones, e.str, 5));
+                        }
+                    }
                 }
                 else
                 {

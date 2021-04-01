@@ -110,6 +110,7 @@ private:
 	double tension;
 	double tensionDecrease;
 	double acoustic;
+	int fretCount;
 	int currentFret;
 	int oldFret;
 	double timeStep;

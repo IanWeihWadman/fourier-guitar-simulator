@@ -52,37 +52,6 @@ int main(int argc, char** argv)
 		double stringAddition = 0;
 		double processedValue = 0;
 		std::string comma;
-		/*for (int i = 0; i < totalLength + 22050; i++) {
-			value = 0;
-			EStream >> stringAddition;
-			value += stringAddition;
-			EStream >> comma;
-			AStream >> stringAddition;
-			value += stringAddition;
-			AStream >> comma;
-			DStream >> stringAddition;
-			value += stringAddition;
-			DStream >> comma;
-			GStream >> stringAddition;
-			value += stringAddition;
-			GStream >> comma;
-			BStream >> stringAddition;
-			value += stringAddition;
-			BStream >> comma;
-			eStream >> stringAddition;
-			value += stringAddition;
-			eStream >> comma;
-			processedValue = 0.6 * value;
-			if (processedValue > 1.8) {
-				processedValue = 1.8;
-			}
-			if (processedValue < -1.8) {
-				processedValue = -1.8;
-			}
-			processedValue = processedValue / (1 + 0.3 * processedValue * processedValue);
-			output << processedValue << ", ";
-		}
-		output.close();*/
 		Amplifier amp(outputDir + "EFile.txt", outputDir + "AFile.txt", outputDir + "DFile.txt", outputDir + "GFile.txt", outputDir + "BFile.txt", outputDir + "HighEFile.txt", outputDir + "output.txt", AString.getAmpPreset(), totalLength);
 	}
 	else

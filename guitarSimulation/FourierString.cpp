@@ -8,7 +8,7 @@ FourierString::FourierString(int tones, int number, std::string fileName)
 	overtones = tones;
 	stringNumber = number;
 	//Default values, usually overwritten when parseMusicFiles is called
-	int fretCount = 20;
+	fretCount = 0;
 	bars = 1;
 	tempo = 1;
 	subdivision = 1;
@@ -80,47 +80,6 @@ FourierString::FourierString(int tones, int number, std::string fileName)
 	pulloffForce = 0;
 	currentPickForce = 0;
 	currentTensionMod = 0;
-	for (int i = 0; i < overtones; i++) {
-		tensionModifiers[i] = ((double) i + 1) * ((double) i + 1) * ( 1 - tensionDecrease * i * i / ((double) overtones * overtones));
-	}
-	for (int i = 0; i < resonanceNum; i++) {
-		resonanceDamping[i] = 3 - i * 2.5 / (double) resonanceNum;
-		resonanceFrequencies[i] = 30000.0 + 6000.0 * i + 700.0 * sqrt(i);
-	}
-	//Every pair of frets has a matrix associated with the transition between those two frets representing a linear transformation on the Fourier coefficients of the state
-	for (int p = 0; p < fretCount; p++) {
-		std::vector<std::vector<std::vector<double>>> nextMatrixSet;
-		double oldFretScale = pow(2, p / (double) 12);
-		for (int k = 0; k < fretCount; k++) {
-			std::vector<std::vector<double>> nextMatrix;
-			double newFretScale = pow(2, k / (double)12);
-			for (int i = 0; i < overtones; i++) {
-				std::vector<double> nextVec;
-				nextVec.assign(overtones, 0);
-				nextMatrix.push_back(nextVec);
-				//Each matrix starts out identical. These are not the mathematically correct values for this transition matrix, but they are simpler and I found it makes no difference to the sound
-				for (int j = 0; j < overtones; j++) {
-					nextMatrix[i][j] = 1 / ( 1 + ((double) i - j) * ((double) i - j));
-				}
-			}
-			//This section rescales the transition matrices to guarantee that the pickup response is the same before and after the fret change, avoiding clicking sounds
-			for (int i = 0; i < overtones; i++) {
-				double total = 0;
-				std::vector<double> testVec;
-				testVec.assign(overtones, 0);
-				testVec[i] = 1;
-				testVec = matrixMultiply(nextMatrix, testVec);
-				for (int j = 0; j < overtones; j++) {
-					total += pickupResponse(oldFretScale, j) * testVec[j];
-				}
-				for (int j = 0; j < overtones; j++) {
-					nextMatrix[j][i] *= pickupResponse(newFretScale, i) / total;
-				}
-			}
-			nextMatrixSet.push_back(nextMatrix);
-		}
-		fretChangeMatrix.push_back(nextMatrixSet);
-	}
 }
 
 std::string FourierString::getAmpPreset() {
@@ -378,6 +337,9 @@ void FourierString::parseMusicFiles(std::string fileName)
 				inStream >> pull;
 				if (string == stringNumber) {
 					fretting.push_back(fret(start, end, change, pull));
+					if (change + 1 > fretCount) {
+						fretCount = change + 1;
+					}
 				}
 			}
 			if (dataType == "muting") {
@@ -580,6 +542,48 @@ double FourierString::getMeasureTimeFromStep(int step)
 
 void FourierString::simulate(std::string file)
 {
+	//Matrix initialization here since we want to be able to skip initialization if we are only running the amplifier
+	for (int i = 0; i < overtones; i++) {
+		tensionModifiers[i] = ((double)i + 1) * ((double)i + 1) * (1 - tensionDecrease * i * i / ((double)overtones * overtones));
+	}
+	for (int i = 0; i < resonanceNum; i++) {
+		resonanceDamping[i] = 3 - i * 2.5 / (double)resonanceNum;
+		resonanceFrequencies[i] = 30000.0 + 6000.0 * i + 700.0 * sqrt(i);
+	}
+	//Every pair of frets has a matrix associated with the transition between those two frets representing a linear transformation on the Fourier coefficients of the state
+	for (int p = 0; p < fretCount; p++) {
+		std::vector<std::vector<std::vector<double>>> nextMatrixSet;
+		double oldFretScale = pow(2, p / (double)12);
+		for (int k = 0; k < fretCount; k++) {
+			std::vector<std::vector<double>> nextMatrix;
+			double newFretScale = pow(2, k / (double)12);
+			for (int i = 0; i < overtones; i++) {
+				std::vector<double> nextVec;
+				nextVec.assign(overtones, 0);
+				nextMatrix.push_back(nextVec);
+				//Each matrix starts out identical. These are not the mathematically correct values for this transition matrix, but they are simpler and I found it makes no difference to the sound
+				for (int j = 0; j < overtones; j++) {
+					nextMatrix[i][j] = 1 / (1 + 0.005 * ((double)i - j) * ((double)i - j));
+				}
+			}
+			//This section rescales the transition matrices to guarantee that the pickup response is the same before and after the fret change, avoiding clicking sounds
+			for (int i = 0; i < overtones; i++) {
+				double total = 0;
+				std::vector<double> testVec;
+				testVec.assign(overtones, 0);
+				testVec[i] = 1;
+				testVec = matrixMultiply(nextMatrix, testVec);
+				for (int j = 0; j < overtones; j++) {
+					total += pickupResponse(oldFretScale, j) * testVec[j];
+				}
+				for (int j = 0; j < overtones; j++) {
+					nextMatrix[j][i] *= pickupResponse(newFretScale, i) / total;
+				}
+			}
+			nextMatrixSet.push_back(nextMatrix);
+		}
+		fretChangeMatrix.push_back(nextMatrixSet);
+	}
 	//This function manages the overall simulation of one string and writes the results to the file passed as parameter
 	double time = 0;
 	double output = 0;
