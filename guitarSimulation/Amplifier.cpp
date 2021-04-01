@@ -1,3 +1,4 @@
+#include <filesystem>
 #include "Amplifier.h"
 
 Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, std::string File4, std::string File5, std::string File6, std::string outFile, std::string presetFile, int totalLength)
@@ -31,6 +32,10 @@ Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, st
 	double feedbackPower = 0;
 	double feedbackWavelength = 0;
 	std::ifstream presetStream("guitarSimulation\\amppresets\\" + presetFile + ".txt");
+	if (presetStream.fail())
+	{
+		throw std::exception("No amp preset\n");
+	}
 	presetStream >> bandClip;
 	presetStream >> compress;
 	presetStream >> threshold;
@@ -57,6 +62,7 @@ Amplifier::Amplifier(std::string File1, std::string File2, std::string File3, st
 	std::ifstream BStream(File5);
 	std::ifstream eStream(File6);
 	std::ofstream output(outFile);
+	if (output.fail()) { throw std::exception("Failed to open wave output file\n"); }
 	std::string comma;
 	std::deque<double> window;
 	window.assign(filterWindow, 0);

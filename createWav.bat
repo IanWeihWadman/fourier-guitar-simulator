@@ -8,7 +8,7 @@ SET wavify=WavMaker\bin\%config%\WavMaker.exe
 
 if exist rawSongFiles\%1 (
     %parse% %1
-    %simulate% %1
+    %simulate% -s %1
     %wavify% %1
 ) else (
     echo %1 not found 
