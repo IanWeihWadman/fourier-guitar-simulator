@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 		{
 			FourierString AString(180, 1, inputPathString); // put here for hacking 
 
-			FourierString BString(120, 4, inputPathString);
+			/*FourierString BString(120, 4, inputPathString);
 			FourierString DString(160, 2, inputPathString);
 			FourierString highEString(100, 5, inputPathString);
 			FourierString EString(200, 0, inputPathString);
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 			highEThread.join();
 			double value = 0;
 			double stringAddition = 0;
-			double processedValue = 0;
+			double processedValue = 0;*/
 		}
 
 		std::string ampPreset = (ampPresetOverride.length() > 0) ? ampPresetOverride : AString.getAmpPreset();

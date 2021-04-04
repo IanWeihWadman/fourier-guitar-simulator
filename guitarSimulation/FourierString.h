@@ -1,8 +1,6 @@
 #pragma once
-#include <vector>
-#include <fstream>
 #include <string>
-#include <math.h>
+#include <vector>
 class FourierString
 {
 	struct fret {

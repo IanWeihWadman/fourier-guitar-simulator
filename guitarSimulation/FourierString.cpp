@@ -1,5 +1,7 @@
 #include "FourierString.h"
 #include <iostream>
+#include <fstream>
+#include <math.h>
 
 FourierString::FourierString(int tones, int number, std::string fileName)
 {
@@ -563,7 +565,7 @@ void FourierString::simulate(std::string file)
 				nextMatrix.push_back(nextVec);
 				//Each matrix starts out identical. These are not the mathematically correct values for this transition matrix, but they are simpler and I found it makes no difference to the sound
 				for (int j = 0; j < overtones; j++) {
-					nextMatrix[i][j] = 1 / (1 + 0.005 * ((double)i - j) * ((double)i - j));
+					nextMatrix[i][j] = 1 / (1 + 0.015 * ((double)i - j) * ((double)i - j));
 				}
 			}
 			//This section rescales the transition matrices to guarantee that the pickup response is the same before and after the fret change, avoiding clicking sounds
